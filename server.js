@@ -44,9 +44,11 @@ const Note = mongoose.model('Note', noteSchema);
 const ProfileInfo = mongoose.model('ProfileInfo', profileInfoSchema);
 const ActivityLog = mongoose.model('ActivityLog', activityLogSchema);
 
-// Authentication middleware
+// Authentication middleware - UPDATED to handle GET requests
 const authenticateUser = (req, res, next) => {
-  const { email } = req.body;
+  // Get email from query params for GET, body for other methods
+  const email = req.method === 'GET' ? req.query.email : req.body.email;
+  
   const authorizedUsers = [
     'savan.deodap@gmail.com',
     'sakilsanna.deodap@gmail.com',
@@ -62,6 +64,11 @@ const authenticateUser = (req, res, next) => {
   
   next();
 };
+
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ status: 'success', message: 'API is working' });
+});
 
 // Routes
 app.post('/api/authenticate', (req, res) => {
@@ -90,6 +97,7 @@ app.post('/api/authenticate', (req, res) => {
   res.json({ success: true, email, role: authorizedUsers[email].role });
 });
 
+// UPDATED GET route to use query parameters for authentication
 app.get('/api/notes/:profile', authenticateUser, async (req, res) => {
   try {
     const { profile } = req.params;
